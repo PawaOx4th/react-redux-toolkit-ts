@@ -16,7 +16,11 @@ export const counterSlice = createSlice({
   name: "counter",
   initialState,
   reducers: {
-    onIncrement: (state, action: PayloadAction<number>) => {
+    onIncrement: (state, action: PayloadAction<number | undefined>) => {
+      if (typeof action.payload === "undefined") {
+        state.count += 1
+        return
+      }
       state.count += action.payload
     },
   },
