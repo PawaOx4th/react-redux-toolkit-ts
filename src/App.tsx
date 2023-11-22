@@ -10,6 +10,16 @@ function App() {
     dispatch(onIncrement(arg))
   }
 
+  const handleFetchTodoById = async (
+    id: Parameters<typeof onFetchTodoById>[0]
+  ) => {
+    try {
+      await dispatch(onFetchTodoById(id))
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   return (
     <>
       <div>
@@ -26,9 +36,9 @@ function App() {
         <br />
         <button
           className="bg-blue-400 px-8 py-2 rounded-md text-white text-2xl active:bg-blue-600 transition-all"
-          onClick={() => dispatch(onFetchTodoById(count))}
+          onClick={() => handleFetchTodoById(count)}
         >
-          Fetch todo with ID
+          Fetch todo with ID :{count}
         </button>
         {loading ? (
           <div>
