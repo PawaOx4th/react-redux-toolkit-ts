@@ -20,16 +20,28 @@ const initialState: CounterState = {
   todo: null,
 }
 
-export const onFetchTodoById = createAsyncThunk(
-  "counter/fetchTodoById",
-  async (id: number) => {
-    const response = await fetch(
-      `https://jsonplaceholder.typicode.com/todos/${id}`
-    )
-    const todo = await response.json()
-    return todo as Todo
-  }
-)
+// const createAppAsyncThunk = createAsyncThunk.withTypes<{
+//   state: RootState
+//   dispatch: AppDispatch
+//   rejectValue: string
+//   extra: { s: string; n: number }
+// }>()
+
+export const onFetchTodoById = createAsyncThunk<
+  Todo | null,
+  number,
+  { state: RootState; extra: { s: string; n: number } }
+>("counter/fetchTodoById", async (id, { getState, extra }) => {
+  console.log("[LOG] 🦁   :", extra)
+  const { count } = getState().counter
+  if (count === id) return getState().counter.todo
+
+  const response = await fetch(
+    `https://jsonplaceholder.typicode.com/todos/${id}`
+  )
+  const todo = await response.json()
+  return todo as Todo
+})
 
 export const counterSlice = createSlice({
   name: "counter",
@@ -42,12 +54,18 @@ export const counterSlice = createSlice({
       }
       state.count += action.payload
     },
+    onResetCount: (state) => {
+      state.count = initialState.count
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(onFetchTodoById.fulfilled, (state, action) => {
       state.loading = false
-      state.count = action.payload.id
-      state.todo = action.payload
+
+      if (action.payload && Object.keys(action.payload).length > 0) {
+        state.count = action.payload.id
+        state.todo = action.payload
+      }
     }),
       builder.addCase(onFetchTodoById.pending, (state) => {
         state.loading = true
@@ -55,6 +73,6 @@ export const counterSlice = createSlice({
   },
 })
 
-export const { onIncrement } = counterSlice.actions
+export const { onIncrement, onResetCount } = counterSlice.actions
 
 export const counterSelector = (state: RootState) => state.counter
